@@ -21,6 +21,7 @@ class MatrixBackend(ErrBot):
         if m:
             data, domain = m.group()
             return data, domain
+        return None, None
 
     @staticmethod
     def parse_identfier(text_rep):
@@ -31,16 +32,17 @@ class MatrixBackend(ErrBot):
         @<user>:<domain>
         """
 
-        if MatrixBackend.parse_identfier_pieces(r"[!#](.*):(.*)", text_rep):
-            # TODO Handle room data.
-            pass
+        room, domain, user = None, None, None
 
-        elif MatrixBackend.parse_identfier_pieces(r"@:(.*):(.*)", text_rep):
-            # TODO Handle user data.
-            pass
-        else:
-            # Got an invalid text representation.
-            pass
+        room, domain = MatrixBackend.parse_identfier_pieces(
+            r"[!#](.*):(.*)", text_rep
+        )
+        if not room or not domain:
+            user, domain = MatrixBackend.parse_identfier_pieces(
+                r"@:(.*):(.*)", text_rep
+            )
+
+        return room, domain, user
 
     def build_reply():
         pass
