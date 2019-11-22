@@ -6,10 +6,29 @@ authors = ["wilypomegranate <wilypomegranate@users.noreply.github.com>"]
 license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
-python = "^3.4"
+python = "^3.6"
 matrix-client = "^0.3.2"
 
+
 [tool.poetry.dev-dependencies]
+black = {version = "^18.9b0", allows-prereleases = true}
+pylint = "^2.4"
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
 
 [build-system]
 requires = ["poetry>=0.12"]

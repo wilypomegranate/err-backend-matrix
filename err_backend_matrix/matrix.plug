@@ -1,0 +1,9 @@
+[Core]
+name = Matrix
+module = matrix
+
+[Documentation]
+description =
+
+[Python]
+version = 3
