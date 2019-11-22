@@ -7,6 +7,7 @@ license = "BSD-3-Clause"
 
 [tool.poetry.dependencies]
 python = "^3.4"
+matrix-client = "^0.3.2"
 
 [tool.poetry.dev-dependencies]
 
