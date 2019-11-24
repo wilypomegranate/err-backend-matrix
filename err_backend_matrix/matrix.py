@@ -150,6 +150,18 @@ class MatrixBackend(ErrBot):
     def rooms(self):
         pass
 
+    def invite_callback(self, *args, **kwargs):
+        print(args, kwargs)
+
+    def ephemeral_callback(self, *args, **kwargs):
+        print(args, kwargs)
+
+    def leave_callback(self, *args, **kwargs):
+        print(args, kwargs)
+
+    def presence_callback(self, *args, **kwargs):
+        print(args, kwargs)
+
     def callback(self, *events):
         for event in events:
             log.debug("Saw event %s.", event)
@@ -166,5 +178,9 @@ class MatrixBackend(ErrBot):
             self.url, token=self.token, user_id=self.user
         )
         self._client.add_listener(self.callback)
+        self._client.add_invite_listener(self.invite_callback)
+        self._client.add_ephemeral_listener(self.ephemeral_callback)
+        self._client.add_leave_listener(self.leave_callback)
+        self._client.add_presence_listener(self.presence_callback)
         self._client.join_room(self.initial_room)
         self._client.listen_forever()
