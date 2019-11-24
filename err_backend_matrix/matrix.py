@@ -2,7 +2,7 @@ import logging
 import re
 
 from errbot.core import ErrBot
-from errbot.backends.base import Person, Room
+from errbot.backends.base import Person, Room, Message
 
 from matrix_client.client import MatrixClient
 from matrix_client.errors import MatrixRequestError
@@ -99,6 +99,7 @@ class MatrixBackend(ErrBot):
         self.token = identity["token"]
         self.url = identity["url"]
         self.user = identity["user"]
+        self._client = None
 
     def build_identifier(self, text_representation: str) -> None:
         """Return an object that idenfifies a matrix person or room."""
@@ -148,10 +149,20 @@ class MatrixBackend(ErrBot):
     def rooms(self):
         pass
 
-    def callback(self, *args, **kwargs):
-        print(args, kwargs)
+    def callback(self, events):
+        for event in events:
+            log.debug("Saw event %s.", event)
+            if event["type"] == "m.room.message":
+                content = event["content"]
+                sender = event["sender"]
+                if content["msgtype"] == "m.text":
+                    msg = Message(content["body"])
+                    msg.frm = MatrixPerson(self._client, sender)
+                    self.callback_message(msg)
 
     def serve_once(self):
-        client = MatrixClient(self.url, token=self.token, user_id=self.user)
-        client.add_listener(self.callback)
-        client.listen_forever()
+        self._client = MatrixClient(
+            self.url, token=self.token, user_id=self.user
+        )
+        self._client.add_listener(self.callback)
+        self._client.listen_forever()
