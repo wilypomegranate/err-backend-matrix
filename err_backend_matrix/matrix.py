@@ -99,6 +99,7 @@ class MatrixBackend(ErrBot):
         self.token = identity["token"]
         self.url = identity["url"]
         self.user = identity["user"]
+        self.initial_room = identity["initial_room"]
         self._client = None
 
     def build_identifier(self, text_representation: str) -> None:
@@ -149,7 +150,7 @@ class MatrixBackend(ErrBot):
     def rooms(self):
         pass
 
-    def callback(self, events):
+    def callback(self, *events):
         for event in events:
             log.debug("Saw event %s.", event)
             if event["type"] == "m.room.message":
@@ -165,4 +166,5 @@ class MatrixBackend(ErrBot):
             self.url, token=self.token, user_id=self.user
         )
         self._client.add_listener(self.callback)
+        self._client.join_room(self.initial_room)
         self._client.listen_forever()
