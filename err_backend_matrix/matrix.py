@@ -2,11 +2,94 @@ import logging
 import re
 
 from errbot.core import ErrBot
+from errbot.backends.base import Person, Room
 
 from matrix_client.client import MatrixClient
+from matrix_client.errors import MatrixRequestError
 
 
 log = logging.getLogger(__name__)
+
+
+class MatrixPerson(Person):
+    """Representation of a matrix user."""
+
+    def __init__(self, client, user_id):
+        self._client = client
+        self.user_id = user_id
+        self._user = self._client.get_user(self.user_id)
+
+    @property
+    def client(self):
+        return self.user_id
+
+    @property
+    def aclattr(self):
+        return self.user_id
+
+    @property
+    def nick(self):
+        return self.user_id
+
+    @property
+    def fullname(self):
+        return self._user.get_friendly_name()
+
+    @property
+    def person(self):
+        return self.user_id
+
+
+class MatrixRoom(Room):
+    """Representation of a matrix room."""
+
+    def __init__(self, name: str, client: MatrixClient):
+        self.name = name
+        self._client = client
+        self._room = None
+
+    def create(self) -> None:
+        self._room = self._client.create_room(self.name, False)
+
+    def destroy(self) -> None:
+        """Can't do anything for destroy rooms."""
+
+    @property
+    def exists(self) -> bool:
+        try:
+            self._client.join_room(self.name)
+            return True
+        except MatrixRequestError as e:
+            if e.code == 404:
+                return False
+            raise
+
+    def invite(self, *args) -> None:
+        for user in args:
+            self._room.invite_user(user.person)
+
+    def join(self, username: str = None, password: str = None) -> None:
+        self._room = self._client.join_room(self.name)
+
+    @property
+    def joined(self) -> bool:
+        for room in self._client.get_rooms():
+            if room == self._room.display_name:
+                return True
+        return False
+
+    def leave(self, reason: str = None) -> None:
+        self._room.leave()
+
+    @property
+    def occupants(self):
+        pass
+
+    @property
+    def topic(self) -> str:
+        # NOTE Not implemented since the high-level API
+        # doesn't have support for this yet.
+        return ""
 
 
 class MatrixBackend(ErrBot):
@@ -71,9 +154,4 @@ class MatrixBackend(ErrBot):
     def serve_once(self):
         client = MatrixClient(self.url, token=self.token, user_id=self.user)
         client.add_listener(self.callback)
-        # client.rooms[0].add_listener(self.callback)
-
-        import time
-
-        while True:
-            time.sleep(1)
+        client.listen_forever()
