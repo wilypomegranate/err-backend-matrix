@@ -170,6 +170,7 @@ class MatrixBackend(ErrBot):
                 if content["msgtype"] == "m.text":
                     msg = Message(content["body"])
                     msg.frm = MatrixPerson(self._client, sender)
+                    msg.to = self.bot_identifier
                     self.callback_message(msg)
 
     def serve_once(self):
@@ -182,4 +183,7 @@ class MatrixBackend(ErrBot):
         self._client.add_leave_listener(self.leave_callback)
         self._client.add_presence_listener(self.presence_callback)
         self.connect_callback()
+
+        self.bot_identifier = MatrixPerson(self._client, self.user)
+
         self._client.listen_forever()
