@@ -99,7 +99,6 @@ class MatrixBackend(ErrBot):
         self.token = identity["token"]
         self.url = identity["url"]
         self.user = identity["user"]
-        self.initial_room = identity["initial_room"]
         self._client = None
 
     def build_identifier(self, text_representation: str) -> None:
@@ -182,5 +181,4 @@ class MatrixBackend(ErrBot):
         self._client.add_ephemeral_listener(self.ephemeral_callback)
         self._client.add_leave_listener(self.leave_callback)
         self._client.add_presence_listener(self.presence_callback)
-        self._client.join_room(self.initial_room)
         self._client.listen_forever()
