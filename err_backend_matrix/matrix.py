@@ -181,4 +181,5 @@ class MatrixBackend(ErrBot):
         self._client.add_ephemeral_listener(self.ephemeral_callback)
         self._client.add_leave_listener(self.leave_callback)
         self._client.add_presence_listener(self.presence_callback)
+        self.connect_callback()
         self._client.listen_forever()
